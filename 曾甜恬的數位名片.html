@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>甜恬的數位名片</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      /* 巧克力棕與奶茶色系定義 */
+      --chocolate: #3E2723;
+      --chocolate-light: #5D4037;
+      --milk-tea: #EADBC8;
+      --milk-tea-light: #F8F3ED;
+      --bg-color: #FDF5E6;
+      
+      --accent: var(--chocolate-light);
+      --accent-soft: var(--milk-tea);
+      --text-main: #2C1810;
+      --text-subtle: #6D5D55;
+      --card-bg: #FFFFFF;
+      --border-soft: rgba(62, 39, 35, 0.08);
+      --shadow-soft: 0 18px 45px rgba(44, 24, 16, 0.12);
+      --radius-xl: 26px;
+      --radius-full: 999px;
+      --transition-med: 260ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "PingFang TC", "Noto Sans TC", sans-serif;
+      background: radial-gradient(circle at top left, var(--milk-tea-light) 0, #EADBC8 42%, #D7CCC8 100%);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 18px;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* 裝飾用小花 */
+    .flower {
+      position: absolute;
+      fill: var(--milk-tea);
+      opacity: 0.4;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .page-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-shell {
+      position: relative;
+      padding: 1px;
+      border-radius: calc(var(--radius-xl) + 1px);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(62, 39, 35, 0.15));
+      box-shadow: 0 28px 60px rgba(44, 24, 16, 0.15);
+      backdrop-filter: blur(20px);
+      z-index: 1;
+      cursor: pointer;
+    }
+
+    .card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1.2fr 1.4fr;
+      gap: 32px;
+      padding: 40px;
+      border-radius: var(--radius-xl);
+      background: radial-gradient(circle at top left, #FFFFFF 0, var(--milk-tea-light) 40%, #EADBC8 100%);
+      border: 1px solid var(--border-soft);
+      transition: transform var(--transition-med), box-shadow var(--transition-med);
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 22px 55px rgba(44, 24, 16, 0.2);
+    }
+
+    .profile-side {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding-right: 10px;
+      border-right: 1px solid var(--border-soft);
+      position: relative;
+      /* 移除讓手機 Bug 的語法，恢復正常層級 */
+    }
+
+    /* 標籤通用樣式 */
+    .badge {
+      position: absolute;
+      background: var(--chocolate);
+      color: var(--milk-tea-light);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      box-shadow: 0 8px 20px rgba(62, 39, 35, 0.3);
+      z-index: 10;
+    }
+
+    .drama-queen-badge {
+      left: -15px;
+      top: 10px;
+      transform: rotate(-12deg);
+      animation: floatBadgeL 3s ease-in-out infinite;
+    }
+
+    .psychology-badge {
+      right: -15px;
+      bottom: 80px;
+      transform: rotate(12deg);
+      animation: floatBadgeR 3.5s ease-in-out infinite;
+    }
+
+    @keyframes floatBadgeL {
+      0%, 100% { transform: rotate(-12deg) translateY(0); }
+      50% { transform: rotate(-12deg) translateY(-5px); }
+    }
+
+    @keyframes floatBadgeR {
+      0%, 100% { transform: rotate(12deg) translateY(0); }
+      50% { transform: rotate(12deg) translateY(-5px); }
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      border-radius: var(--radius-full);
+      padding: 6px;
+      background: linear-gradient(135deg, var(--chocolate-light), var(--milk-tea));
+      box-shadow: 0 18px 40px rgba(44, 24, 16, 0.25);
+      transition: transform 260ms ease-out;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      z-index: 5;
+    }
+
+    .avatar-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      background: #D7CCC8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .avatar-inner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* 愛心特效樣式 */
+    .heart-effect {
+      position: absolute;
+      pointer-events: none;
+      font-size: 24px;
+      color: var(--chocolate-light);
+      z-index: 100;
+      animation: heartFloat 1s ease-out forwards;
+      opacity: 0;
+    }
+
+    @keyframes heartFloat {
+      0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+      20% { opacity: 1; }
+      100% { transform: translate(calc(-50% + var(--x)), calc(-50% - 120px)) scale(1.2); opacity: 0; }
+    }
+
+    /* 溫馨提醒文字樣式 */
+    .toast-message {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--chocolate);
+      color: var(--milk-tea-light);
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 500;
+      box-shadow: 0 10px 30px rgba(44, 24, 16, 0.3);
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none;
+    }
+
+    .toast-message.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .name-block { text-align: center; }
+
+    .name {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--chocolate);
+      background: rgba(255, 255, 255, 0.7);
+      padding: 6px 22px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(62, 39, 35, 0.1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .name-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--chocolate);
+    }
+
+    .subtitle {
+      margin-top: 10px;
+      font-size: 13px;
+      letter-spacing: 0.15em;
+      color: var(--chocolate-light);
+      font-weight: 500;
+    }
+
+    .content-side {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 24px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .pill-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--chocolate-light);
+      padding: 4px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid var(--border-soft);
+      width: fit-content;
+      font-weight: 600;
+    }
+
+    .headline {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--chocolate);
+      line-height: 1.6;
+    }
+
+    .headline span {
+      background: linear-gradient(transparent 65%, var(--milk-tea) 65%);
+      padding: 0 2px;
+    }
+
+    .bio {
+      font-size: 15px;
+      line-height: 1.9;
+      color: var(--text-subtle);
+      text-align: justify;
+    }
+
+    .socials {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .social-btn {
+      padding: 12px 24px;
+      border-radius: 999px;
+      background: var(--chocolate);
+      color: var(--milk-tea-light);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: none;
+      cursor: pointer;
+    }
+
+    .social-btn:hover {
+      background: var(--chocolate-light);
+      transform: translateY(-3px) scale(1.05);
+    }
+
+    /* 點擊按鈕時文字變成藍色的效果 */
+    .social-btn:active {
+      color: #8AB4F8 !important; /* 柔和的淺藍色 */
+      transform: translateY(-1px) scale(1.02); /* 微按壓效果 */
+    }
+
+    @media (max-width: 800px) {
+      .card { grid-template-columns: 1fr; padding: 35px 24px; }
+      .profile-side { padding-right: 0; border-right: none; border-bottom: 1px solid var(--border-soft); padding-bottom: 30px; }
+      .drama-queen-badge { left: 20px; top: -10px; }
+      .psychology-badge { right: 20px; bottom: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 背景小花裝飾 -->
+  <svg class="flower" style="top: 10%; left: 5%; width: 50px;" viewBox="0 0 100 100">
+    <path d="M50 50 Q60 20 80 40 T50 50 Q80 60 60 80 T50 50 Q40 80 20 60 T50 50 Q20 40 40 20 T50 50" />
+  </svg>
+  <svg class="flower" style="bottom: 15%; right: 10%; width: 70px; transform: rotate(45deg);" viewBox="0 0 100 100">
+    <path d="M50 50 Q60 20 80 40 T50 50 Q80 60 60 80 T50 50 Q40 80 20 60 T50 50 Q20 40 40 20 T50 50" />
+  </svg>
+
+  <div class="page-wrapper">
+    <div class="card-shell" id="cardTrigger">
+      <main class="card">
+        <!-- 名片內的小花 -->
+        <svg class="flower" style="top: -20px; right: -20px; width: 100px; opacity: 0.1;" viewBox="0 0 100 100">
+          <path d="M50 50 Q60 20 80 40 T50 50 Q80 60 60 80 T50 50 Q40 80 20 60 T50 50 Q20 40 40 20 T50 50" />
+        </svg>
+
+        <section class="profile-side">
+          <div class="badge drama-queen-badge">追劇女王</div>
+          <div class="badge psychology-badge">心理學</div>
+          
+          <div class="avatar-wrapper" id="avatarWrapper">
+            <div class="avatar-inner">
+              <!-- 已套用 jsDelivr 全球加速，完美繞過手機對於 raw 圖片的封鎖 -->
+              <img src="https://cdn.jsdelivr.net/gh/Mia930330/card@main/photo.jpg" alt="曾甜恬" id="profileImg" onerror="this.style.display='none'; this.parentNode.innerHTML='📸';" />
+            </div>
+          </div>
+          <div class="name-block">
+            <div class="name">
+              <span class="name-dot"></span>
+              <span>曾甜恬</span>
+            </div>
+            <div class="subtitle">KMU Student · Romantic Girl</div>
+          </div>
+        </section>
+
+        <section class="content-side">
+          <div>
+            <div class="pill-label">Personal Profile</div>
+            <h2 class="headline">
+              在生活的小細節中，<span>尋找儀式感</span>與甜
+            </h2>
+          </div>
+          
+          <p class="bio">
+            嗨，我是甜恬 ☁️<br>
+            一個喜歡心理學、觀察人類，也熱愛追劇的女孩~~~<br>
+            平常會用影像來記錄生活的小美好，正在努力把平凡的日子過得更有趣、更有儀式感!
+          </p>
+
+          <div class="socials">
+            <a href="https://www.instagram.com/cortis/" target="_blank" rel="noopener noreferrer" class="social-btn" style="background: #795548;">
+              <span>◎</span> Instagram
+            </a>
+            <a href="mailto:u111007212@gap.kmu.edu.tw" class="social-btn" style="background: #8D6E63;">
+              <span>@</span> Email
+            </a>
+            <a href="https://github.com/" target="_blank" rel="noopener noreferrer" class="social-btn" style="background: #5D4037;">
+              <span>▢</span> GitHub
+            </a>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- 點擊名片出現的提示訊息 -->
+  <div id="toast" class="toast-message">今天也要好好生活呀 ☕</div>
+
+  <script>
+    const avatarWrapper = document.getElementById("avatarWrapper");
+    const cardTrigger = document.getElementById("cardTrigger");
+    const toast = document.getElementById("toast");
+    let toastTimeout;
+
+    // 1. 3D 傾斜互動效果
+    avatarWrapper.addEventListener("mousemove", (e) => {
+      const rect = avatarWrapper.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const rotateY = ((x - rect.width / 2) / rect.width) * 15;
+      const rotateX = -((y - rect.height / 2) / rect.height) * 15;
+      avatarWrapper.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+
+    avatarWrapper.addEventListener("mouseleave", () => {
+      avatarWrapper.style.transform = "perspective(800px) rotateX(0deg) rotateY(0deg)";
+    });
+
+    // 2. 點擊噴發巧克力愛心特效 (只限點擊頭像)
+    avatarWrapper.addEventListener("click", (e) => {
+      // 防止事件往上傳遞，觸發名片的點擊提示
+      e.stopPropagation(); 
+      for(let i = 0; i < 5; i++) {
+        const heart = document.createElement("div");
+        heart.innerHTML = "❤";
+        heart.className = "heart-effect";
+        heart.style.left = `50%`;
+        heart.style.top = `50%`;
+        const randomX = (Math.random() - 0.5) * 150; 
+        heart.style.setProperty('--x', `${randomX}px`);
+        heart.style.animationDelay = `${Math.random() * 0.2}s`;
+        avatarWrapper.appendChild(heart);
+        setTimeout(() => { heart.remove(); }, 1000);
+      }
+    });
+
+    // 3. 點擊名片顯示提示訊息 (排除點擊到按鈕的狀況)
+    cardTrigger.addEventListener("click", (e) => {
+      // 確保點擊到的不是社群按鈕，才觸發提示文字
+      if (e.target.closest('.social-btn')) {
+        return;
+      }
+      if (toastTimeout) clearTimeout(toastTimeout);
+      
+      toast.classList.add("visible");
+      
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove("visible");
+      }, 2000);
+    });
+  </script>
+</body>
+</html>
